@@ -1,3 +1,4 @@
+import argparse
 import os
 import logging
 import io
@@ -12,6 +13,9 @@ from openai import OpenAI
 load_dotenv()
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+ANKI_DECK = os.getenv("ANKI_DECK", "RD")
+ANKI_MODEL = os.getenv("ANKI_MODEL", "Basic")
+ANKI_CONNECT_URL = os.getenv("ANKI_CONNECT_URL", "http://localhost:8765")
 
 if not TELEGRAM_TOKEN:
     raise RuntimeError("Defina TELEGRAM_TOKEN no .env")
@@ -100,8 +104,8 @@ async def log_palavra(update: Update, context: ContextTypes.DEFAULT_TYPE):
             }]
 
         note = {
-            "deckName": "RD",           # ou o nome do seu baralho
-            "modelName": "Basic",            # ou o nome do seu modelo
+            "deckName": ANKI_DECK,           # ou o nome do seu baralho
+            "modelName": ANKI_MODEL,            # ou o nome do seu modelo
             "fields": {
                 "Front": "<img src='image.png'><br><br>" + palavra,
                 "Back": defin + "<br><br>" + exemplo
@@ -116,12 +120,27 @@ async def log_palavra(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "version": 6,
             "params": {"note": note}
         }
-        resp = requests.post("http://localhost:8765", json=payload).json()
+        resp = requests.post(ANKI_CONNECT_URL, json=payload).json()
         logging.info(f"AnkiConnect response: {resp}")
     except Exception as e:
         logging.error(f"Erro ao criar card no Anki: {e}")
 
 def main():
+    global ANKI_DECK, ANKI_MODEL, ANKI_CONNECT_URL
+    parser = argparse.ArgumentParser(description="Telegram bot that adds words to Anki")
+    parser.add_argument("--anki-deck", default=ANKI_DECK, help="Nome do baralho (env ANKI_DECK)")
+    parser.add_argument("--anki-model", default=ANKI_MODEL, help="Nome do modelo (env ANKI_MODEL)")
+    parser.add_argument(
+        "--anki-connect-url",
+        default=ANKI_CONNECT_URL,
+        help="URL do AnkiConnect (env ANKI_CONNECT_URL)",
+    )
+    args = parser.parse_args()
+
+    ANKI_DECK = args.anki_deck
+    ANKI_MODEL = args.anki_model
+    ANKI_CONNECT_URL = args.anki_connect_url
+
     app = ApplicationBuilder().token(TELEGRAM_TOKEN).build()
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, log_palavra))
     print("Bot iniciado. Pressione Ctrl+C para parar.")
