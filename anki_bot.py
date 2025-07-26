@@ -122,6 +122,14 @@ async def log_palavra(update: Update, context: ContextTypes.DEFAULT_TYPE):
         }
         resp = requests.post(ANKI_CONNECT_URL, json=payload).json()
         logging.info(f"AnkiConnect response: {resp}")
+
+        # Sincroniza o Anki após adicionar o card
+        sync_payload = {
+            "action": "sync",
+            "version": 6
+        }
+        sync_resp = requests.post(ANKI_CONNECT_URL, json=sync_payload).json()
+        logging.info(f"AnkiConnect sync response: {sync_resp}")
     except Exception as e:
         logging.error(f"Erro ao criar card no Anki: {e}")
 

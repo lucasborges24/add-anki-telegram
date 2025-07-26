@@ -2,21 +2,41 @@
 
 This project builds a Docker image containing Anki, the AnkiConnect add-on and a Telegram bot.
 
-## First-time setup
+## First-time setup: Log in to AnkiWeb
 
-The container starts Anki headlessly under Xvfb and exposes the AnkiConnect port. To synchronise with your AnkiWeb account you must sign in once using the standard Anki interface. The easiest method is:
+Before running the bot service, you **must log in to your AnkiWeb account** inside the container to enable synchronization. This only needs to be done once, and your credentials will be saved in the `anki_data` volume.
 
-1. Run the container interactively with access to your host display:
+### Steps:
 
-```bash
-docker run --rm -e DISPLAY=your_display \
-  -v anki_data:/root/.local/share/Anki2 \
-  --entrypoint bash add-anki-telegram
-```
+1. **Allow Docker to access your X server:**
+   ```bash
+   xhost +local:docker
+   ```
 
-2. Inside the container launch `anki` and log in with your AnkiWeb ID and password. These credentials are stored in the mounted profile directory (`anki_data` volume) so subsequent runs will automatically sync.
+2. **Start the container with GUI support:**
+   ```bash
+   sudo docker run --rm -it \
+     --entrypoint /bin/bash \
+     -v /tmp/.X11-unix:/tmp/.X11-unix \
+     -e DISPLAY=$DISPLAY \
+     -v anki_data:/root/.local/share/Anki2 \
+     -v "$(pwd)/.env":/app/.env:ro \
+     -e QTWEBENGINE_CHROMIUM_FLAGS="--no-sandbox --disable-gpu" \
+     add-anki-telegram
+   ```
 
-After logging in you can start the service normally using `docker-compose up -d`.
+3. **Inside the container, launch Anki:**
+   ```bash
+   anki
+   ```
+   Log in with your AnkiWeb ID and password.  
+   Adicione a extensão do anki connect
+   After logging in, you can close Anki and exit the container.
+
+4. **Now you can start the service normally:**
+   ```bash
+   docker-compose up --build -d
+   ```
 
 ## Environment variables
 
