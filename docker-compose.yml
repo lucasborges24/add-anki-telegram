@@ -1,0 +1,16 @@
+version: '3.8'
+services:
+  anki_bot:
+    build: .
+    ports:
+      - "${ANKICONNECT_PORT:-8765}:${ANKICONNECT_PORT:-8765}"
+    environment:
+      TELEGRAM_TOKEN: ${TELEGRAM_TOKEN}
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      ANKICONNECT_PORT: ${ANKICONNECT_PORT:-8765}
+    volumes:
+      - anki_data:/root/.local/share/Anki2
+    restart: unless-stopped
+
+volumes:
+  anki_data:

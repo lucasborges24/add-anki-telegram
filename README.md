@@ -1,34 +1,31 @@
-# Add Anki Telegram
+# Add Anki Telegram Bot
 
-Este projeto fornece um bot do Telegram capaz de gerar definicoes e imagens usando a API da OpenAI e, em seguida, criar flashcards no Anki via AnkiConnect.
+This project builds a Docker image containing Anki, the AnkiConnect add-on and a Telegram bot.
 
-## Requisitos
+## First-time setup
 
-1. Python 3.10 ou superior.
-2. Um bot do Telegram, com o token respectivo configurado em `.env`.
-3. Chave de API da OpenAI configurada tambem em `.env`.
+The container starts Anki headlessly under Xvfb and exposes the AnkiConnect port. To synchronise with your AnkiWeb account you must sign in once using the standard Anki interface. The easiest method is:
 
-## Instalacao
-
-Crie um ambiente virtual e instale as dependencias executando:
+1. Run the container interactively with access to your host display:
 
 ```bash
-pip install -r requirements.txt
+docker run --rm -e DISPLAY=your_display -v anki_data:/root/.local/share/Anki2 add-anki-telegram bash
 ```
 
-Este mesmo arquivo pode ser usado em um `Dockerfile` para instalacao das bibliotecas:
+2. Inside the container launch `anki` and log in with your AnkiWeb ID and password. These credentials are stored in the mounted profile directory (`anki_data` volume) so subsequent runs will automatically sync.
 
-```Dockerfile
-COPY requirements.txt ./
-RUN pip install -r requirements.txt
-```
+After logging in you can start the service normally using `docker-compose up -d`.
 
-## Uso
+## Environment variables
 
-Execute o script principal:
+- `TELEGRAM_TOKEN` – Token for your Telegram bot
+- `OPENAI_API_KEY` – API key for OpenAI
+- `ANKICONNECT_PORT` – Port exposed by AnkiConnect (default `8765`)
+
+## Build and run
 
 ```bash
-python anki_bot.py
+docker-compose up --build
 ```
 
-O bot iniciara a escuta por mensagens de texto no Telegram e criara cards no Anki conforme descrito no codigo.
+The profile data is persisted in the `anki_data` volume.
