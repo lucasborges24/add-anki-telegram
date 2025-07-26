@@ -13,11 +13,11 @@ RUN apt-get update \
  && rm -rf /var/lib/apt/lists/* \
  # baixe o launcher .tar.zst
  && wget -qO /tmp/anki.tar.zst \
-        https://github.com/ankitects/anki/releases/download/25.02.7/anki-25.02.7-linux-qt6.tar.zst \
+        https://github.com/ankitects/anki/releases/download/${ANKI_RELEASE}/anki-${ANKI_RELEASE}-linux-qt6.tar.zst \
  && mkdir -p /opt/anki \
  # descompacta com zstd
  && tar --use-compress-program=unzstd -xf /tmp/anki.tar.zst -C /opt/anki \
- && ln -s /opt/anki/bin/anki /usr/local/bin/anki \
+ && ln -s /opt/anki/anki-${ANKI_RELEASE}-linux-qt6/anki /usr/local/bin/anki \
  && rm /tmp/anki.tar.zst
 
 

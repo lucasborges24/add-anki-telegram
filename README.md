@@ -9,7 +9,9 @@ The container starts Anki headlessly under Xvfb and exposes the AnkiConnect port
 1. Run the container interactively with access to your host display:
 
 ```bash
-docker run --rm -e DISPLAY=your_display -v anki_data:/root/.local/share/Anki2 add-anki-telegram bash
+docker run --rm -e DISPLAY=your_display \
+  -v anki_data:/root/.local/share/Anki2 \
+  --entrypoint bash add-anki-telegram
 ```
 
 2. Inside the container launch `anki` and log in with your AnkiWeb ID and password. These credentials are stored in the mounted profile directory (`anki_data` volume) so subsequent runs will automatically sync.
